@@ -31,3 +31,24 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+*.secrets.properties
+secrets/
+*.pem
+*.key
+*.p12
+*.log
+
+# Local environment and secret files
+.env
+.env.*
+!.env.example
+*.secrets.properties
+secrets/
+*.pem
+*.key
+*.p12

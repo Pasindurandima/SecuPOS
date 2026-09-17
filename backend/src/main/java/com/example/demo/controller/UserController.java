@@ -26,6 +26,7 @@ import com.example.demo.dto.UserUpdateRequest;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.ExpenseRepository;
 import com.example.demo.repository.PurchaseRepository;
 import com.example.demo.repository.RoleRepository;
@@ -120,7 +121,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", UserResponse.from(user)));
     }
 
@@ -128,7 +129,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable Long id,
             @Valid @RequestBody UserUpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
             user.setUsername(request.getUsername().trim());
@@ -162,7 +163,7 @@ public class UserController {
         }
         if (request.getRoleName() != null && !request.getRoleName().isBlank()) {
             Role role = roleRepository.findByNameIgnoreCase(request.getRoleName().trim())
-                    .orElseThrow(() -> new RuntimeException("Role not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
             user.setRole(role);
             user.setRoleName(role.getName());
         }

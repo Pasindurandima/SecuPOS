@@ -21,7 +21,7 @@ class UserControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", authorities = {"PERMISSION_USERS"})
     void shouldUpdateUser() throws Exception {
         String payload = """
                 {
@@ -33,16 +33,16 @@ class UserControllerTest {
                 }
                 """;
 
-        mockMvc.perform(put("/api/users/1")
+        mockMvc.perform(put("/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @WithMockUser(username = "admin", authorities = {"PERMISSION_USERS"})
     void shouldDeleteUser() throws Exception {
-        mockMvc.perform(delete("/api/users/1"))
+        mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isNotFound());
     }
 }
