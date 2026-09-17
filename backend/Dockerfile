@@ -26,6 +26,6 @@ ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/.
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=45s --retries=3 \
-    CMD-SHELL curl --fail --silent "http://localhost:$${PORT:-8080}/api/actuator/health" || exit 1
+    CMD curl --fail --silent "http://localhost:$${PORT:-8080}/api/actuator/health" || exit 1
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
