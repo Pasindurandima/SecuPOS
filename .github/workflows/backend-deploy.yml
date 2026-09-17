@@ -18,8 +18,8 @@ jobs:
     environment: production
 
     env:
-      RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP || vars.AZURE_RESOURCE_GROUP }}
-      WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME || vars.AZURE_WEBAPP_NAME }}
+      RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
 
     steps:
       - name: Checkout
@@ -31,12 +31,12 @@ jobs:
         shell: bash
         run: |
           test -n "$RESOURCE_GROUP" || {
-            echo "Missing AZURE_RESOURCE_GROUP GitHub secret or variable"
+            echo "Missing AZURE_RESOURCE_GROUP GitHub secret"
             exit 1
           }
 
           test -n "$WEBAPP_NAME" || {
-            echo "Missing AZURE_WEBAPP_NAME GitHub secret or variable"
+            echo "Missing AZURE_WEBAPP_NAME GitHub secret"
             exit 1
           }
 
@@ -68,6 +68,14 @@ jobs:
             --linux-fx-version "JAVA|17-java17"
 
       - name: Configure App Service settings
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
         run: |
           az webapp config appsettings set \
             --resource-group "$RESOURCE_GROUP" \
@@ -75,13 +83,13 @@ jobs:
             --settings \
               WEBSITES_PORT=8080 \
               SPRING_PROFILES_ACTIVE=prod \
-              MYSQL_HOST="${{ secrets.MYSQL_HOST }}" \
-              MYSQL_PORT="${{ secrets.MYSQL_PORT }}" \
-              MYSQL_DATABASE="${{ secrets.MYSQL_DATABASE }}" \
-              MYSQL_USERNAME="${{ secrets.MYSQL_USERNAME }}" \
-              MYSQL_PASSWORD="${{ secrets.MYSQL_PASSWORD }}" \
-              JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              FRONTEND_URL="${{ secrets.FRONTEND_URL }}"
+              MYSQL_HOST="$MYSQL_HOST" \
+              MYSQL_PORT="$MYSQL_PORT" \
+              MYSQL_DATABASE="$MYSQL_DATABASE" \
+              MYSQL_USERNAME="$MYSQL_USERNAME" \
+              MYSQL_PASSWORD="$MYSQL_PASSWORD" \
+              JWT_SECRET="$JWT_SECRET" \
+              FRONTEND_URL="$FRONTEND_URL"
 
       - name: Deploy JAR to Azure App Service
         uses: azure/webapps-deploy@v3
