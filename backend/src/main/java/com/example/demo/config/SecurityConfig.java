@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health").permitAll()
                       .requestMatchers("/auth/**", "/public/**", "/adding-users/**", "/roles/initialize").permitAll()
                       .requestMatchers("/roles/**").hasAuthority("PERMISSION_ROLES")
                       .requestMatchers("/users/**").hasAuthority("PERMISSION_USERS")
