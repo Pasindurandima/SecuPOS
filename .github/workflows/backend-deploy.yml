@@ -103,11 +103,28 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --name "$WEBAPP_NAME"
 
-      - name: Verify health endpoint
+      - name: Resolve App Service hostname
+        id: app-service
         shell: bash
         run: |
-          HEALTH_URL="https://${WEBAPP_NAME}.azurewebsites.net/api/actuator/health"
+          DEFAULT_HOSTNAME=$(az webapp show \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "$WEBAPP_NAME" \
+            --query defaultHostName \
+            --output tsv)
 
+          test -n "$DEFAULT_HOSTNAME" || {
+            echo "Azure returned no App Service default hostname"
+            exit 1
+          }
+
+          echo "health_url=https://${DEFAULT_HOSTNAME}/api/actuator/health" >> "$GITHUB_OUTPUT"
+
+      - name: Verify health endpoint
+        shell: bash
+        env:
+          HEALTH_URL: ${{ steps.app-service.outputs.health_url }}
+        run: |
           echo "Checking: $HEALTH_URL"
 
           curl \
@@ -116,5 +133,5 @@ jobs:
             --silent \
             --retry 12 \
             --retry-delay 10 \
-            --retry-connrefused \
+            --retry-all-errors \
             "$HEALTH_URL"
