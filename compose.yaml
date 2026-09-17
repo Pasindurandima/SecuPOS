@@ -13,7 +13,8 @@ services:
       MYSQL_USERNAME: ${MYSQL_USERNAME:-root}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:-}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-https://secupos.netlify.app}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://secupos.netlify.app,https://www.secupos.netlify.app,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:3000}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
