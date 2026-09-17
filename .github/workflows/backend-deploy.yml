@@ -2,7 +2,7 @@ name: Backend Deploy to Azure App Service
 
 on:
   workflow_run:
-    workflows: ["Backend CI"]
+    workflows: ["Backend CI", "Backend Docker Build"]
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && contains(fromJSON('["Backend CI","Backend Docker Build"]'), github.event.workflow_run.name))
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -34,6 +34,25 @@ jobs:
           test -n "$WEBAPP_NAME" || { echo "Missing AZURE_WEBAPP_NAME repository variable"; exit 1; }
           test -n "$ACR_NAME" || { echo "Missing ACR_NAME repository variable"; exit 1; }
           test -n "$ACR_LOGIN_SERVER" || { echo "Missing ACR_LOGIN_SERVER repository variable"; exit 1; }
+
+      - name: Ensure CI and Docker checks succeeded
+        if: github.event_name != 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+
+          for workflow_name in "Backend CI" "Backend Docker Build"; do
+            status=$(gh run list --repo "${{ github.repository }}" --limit 50 --json name,headSha,conclusion | \
+              jq -r --arg sha "${HEAD_SHA}" --arg name "${workflow_name}" '.[] | select(.headSha == $sha and .name == $name) | .conclusion' | head -n 1)
+
+            if [[ "${status}" != "success" ]]; then
+              echo "Required workflow '${workflow_name}' did not succeed for ${HEAD_SHA}."
+              exit 1
+            fi
+          done
 
       - name: Sign in to Azure with OIDC
         uses: azure/login@v2
