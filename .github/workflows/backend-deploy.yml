@@ -65,7 +65,8 @@ jobs:
           az webapp config set \
             --resource-group "$RESOURCE_GROUP" \
             --name "$WEBAPP_NAME" \
-            --linux-fx-version "JAVA|17-java17"
+            --linux-fx-version "JAVA|17-java17" \
+            --startup-file "java -jar /home/site/wwwroot/demo-0.0.1-SNAPSHOT.jar"
 
       - name: Configure App Service settings
         env:
