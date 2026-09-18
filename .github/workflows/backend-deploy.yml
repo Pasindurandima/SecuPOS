@@ -60,13 +60,24 @@ jobs:
           chmod +x mvnw
           ./mvnw clean package -DskipTests
 
+      - name: Prepare deployment artifact
+        shell: bash
+        run: |
+          mkdir -p deploy
+          JAR_PATH=$(find backend/target -maxdepth 1 -type f -name '*.jar' ! -name '*.jar.original' -print -quit)
+          test -n "$JAR_PATH" || {
+            echo "No Spring Boot JAR found in backend/target"
+            exit 1
+          }
+          mv "$JAR_PATH" deploy/app.jar
+
       - name: Configure App Service
         run: |
           az webapp config set \
             --resource-group "$RESOURCE_GROUP" \
             --name "$WEBAPP_NAME" \
             --linux-fx-version "JAVA|17-java17" \
-            --startup-file "java -jar /home/site/wwwroot/demo-0.0.1-SNAPSHOT.jar"
+            --startup-file "java -jar /home/site/wwwroot/app.jar"
 
       - name: Configure App Service settings
         env:
@@ -96,7 +107,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
-          package: backend/target/*.jar
+          package: deploy/app.jar
 
       - name: Restart App Service
         run: |
