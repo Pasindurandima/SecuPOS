@@ -73,7 +73,7 @@ The image runs as non-root, exposes port 8080, and has a health check at `/api/a
 - `backend-ci.yml`: Java 17 Maven verification on backend pull requests and pushes to `main`.
 - `backend-docker.yml`: Docker Buildx build validation on backend pull requests and pushes to `main`.
 - `backend-deploy.yml`: runs after successful `Backend CI` on `main` or manually, pushes to ACR, updates App Service, and verifies health.
-- `frontend-ci.yml`: Node 20 install/build, optional lint/tests, and Netlify production deploy only on `main`.
+- `frontend-ci.yml`: Node 22.13 install/build, optional lint/tests, and Netlify production deploy only on `main`.
 
 Pull requests never deploy production.
 

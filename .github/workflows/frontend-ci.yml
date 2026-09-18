@@ -24,12 +24,12 @@ jobs:
         working-directory: frontend
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Set up Node.js 20
-        uses: actions/setup-node@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22.13.0'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
@@ -48,6 +48,15 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+      - name: Validate Netlify deployment secrets
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          test -n "$NETLIFY_AUTH_TOKEN" || { echo "Missing NETLIFY_AUTH_TOKEN GitHub secret"; exit 1; }
+          test -n "$NETLIFY_SITE_ID" || { echo "Missing NETLIFY_SITE_ID GitHub secret"; exit 1; }
 
       - name: Deploy to Netlify from main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
